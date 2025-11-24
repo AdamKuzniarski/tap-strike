@@ -7,7 +7,7 @@ interface GameHUDProps {
   timeleft: number;
 }
 
-export default function GameHUD({
+export  function GameHUD({
   score,
   misses,
   maxMisses,
