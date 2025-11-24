@@ -44,7 +44,7 @@ export function GameScreen() {
           score={score}
           misses={misses}
           maxMisses={config.maxMisses}
-          timeleft={timeLeft}
+          timeLeft={timeLeft}
         />
         <GameGrid
           gridSize={config.gridSize}
