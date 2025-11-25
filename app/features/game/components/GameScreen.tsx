@@ -18,6 +18,8 @@ export function GameScreen() {
     handleTileClick,
     cleanup,
     config,
+    difficulty,
+    setDifficulty,
   } = useGameStore();
 
   useEffect(() => {
@@ -52,7 +54,13 @@ export function GameScreen() {
           isRunning={isRunning}
           onTileClick={handleTileClick}
         />
-        <GameControls status={status} onStart={start} onReset={reset} />
+        <GameControls
+          status={status}
+          difficulty={difficulty}
+          onChangeDifficulty={setDifficulty}
+          onStart={start}
+          onReset={reset}
+        />
         {status === "game-over" && (
           <p className="text-xs text-slate-400 mt-2">
             Game Over - Score <span className=" font-semibold">{score}</span>,

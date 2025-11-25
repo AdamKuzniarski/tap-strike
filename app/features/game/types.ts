@@ -1,5 +1,7 @@
 export type GameStatus = "idle" | "running" | "paused" | "game-over";
 
+export type Difficulty = "easy" | "normal" | "hard";
+
 export interface GameConfig {
   gridSize: number;
   roundDurationMs: number;

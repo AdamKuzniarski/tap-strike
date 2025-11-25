@@ -1,8 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import { DEFAULT_GAME_CONFIG } from "./config";
-import type { GameConfig, GameStatus } from "./types";
+import {
+  DEFAULT_GAME_CONFIG,
+  DEFAULT_DIFFICULTY,
+  DIFFICULTY_CONFIGS,
+} from "./config";
+import type { GameConfig, GameStatus, Difficulty } from "./types";
 
 // Timer außerhalb des Stores
 
@@ -30,6 +34,7 @@ export interface GameStore {
   misses: number;
   timeLeft: number;
   config: GameConfig;
+  difficulty: Difficulty;
 
   //Actions
 
@@ -37,6 +42,7 @@ export interface GameStore {
   reset: () => void;
   handleTileClick: (index: number) => void;
   setConfig: (config: GameConfig) => void;
+  setDifficulty: (difficulty: Difficulty) => void;
   cleanup: () => void; // hilfsFunction bie unmount
 }
 
@@ -109,6 +115,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     misses: 0,
     timeLeft: DEFAULT_GAME_CONFIG.gameDurationSeconds,
     config: DEFAULT_GAME_CONFIG,
+    difficulty: DEFAULT_DIFFICULTY,
 
     start: () => {
       const { config } = get();
@@ -184,6 +191,20 @@ export const useGameStore = create<GameStore>((set, get) => {
         misses: 0,
         timeLeft: state.config.gameDurationSeconds,
       }));
+    },
+    setDifficulty: (difficulty: Difficulty) => {
+      const config = DIFFICULTY_CONFIGS[difficulty];
+      clearRoundTimeout();
+      clearCountdownInterval();
+      set({
+        status: "idle",
+        activeIndex: null,
+        score: 0,
+        misses: 0,
+        timeLeft: config.gameDurationSeconds,
+        config,
+        difficulty,
+      });
     },
   };
 });
