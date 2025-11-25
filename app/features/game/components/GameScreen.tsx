@@ -37,7 +37,7 @@ export function GameScreen() {
           </h1>
           <p className="text-sm text-slate-400">
             Triff das aktive feld schnell wie möglich. Train your reflexes
-            solider!ier 🫡
+            solider! 🫡
           </p>
         </header>
         <GameHUD
@@ -53,6 +53,13 @@ export function GameScreen() {
           onTileClick={handleTileClick}
         />
         <GameControls status={status} onStart={start} onReset={reset} />
+        {status === "game-over" && (
+          <p className="text-xs text-slate-400 mt-2">
+            Game Over - Score <span className=" font-semibold">{score}</span>,
+            Fehler:
+            <span className="font-semibold">{misses}</span>
+          </p>
+        )}
       </div>
     </main>
   );

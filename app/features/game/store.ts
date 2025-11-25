@@ -53,7 +53,10 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   function scheduleNextRound() {
     clearRoundTimeout();
-    const { config } = get();
+    const { config, status } = get();
+
+    if (status !== "running") return;
+
     const totalTiles = config.gridSize * config.gridSize;
     const randomIndex = Math.floor(Math.random() * totalTiles);
 
@@ -64,14 +67,19 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     roundTimeoutId = setTimeout(() => {
       set((state) => {
+        if (state.status !== "running") return state;
+
         const nextMisses = state.misses + 1;
+        //game over check?
         if (nextMisses >= state.config.maxMisses) {
           endGame();
+          set({ misses: nextMisses });
+          return { ...state, misses: nextMisses };
+        } else {
+          //Kein game over -nächste Runde
+          scheduleNextRound();
           return { ...state, misses: nextMisses };
         }
-        //nächste Runde
-        scheduleNextRound();
-        return { ...state, misses: nextMisses };
       });
     }, config.roundDurationMs);
   }
@@ -79,14 +87,19 @@ export const useGameStore = create<GameStore>((set, get) => {
   function startCountdown() {
     clearCountdownInterval();
     countdownIntervalId = setInterval(() => {
-      set((state) => {
-        if (state.timeLeft <= 1) {
-          clearCountdownInterval();
-          endGame();
-          return { ...state, timeLeft: 0 };
-        }
-        return { ...state, timeLeft: state.timeLeft - 1 };
-      });
+      const state = get();
+
+      if (state.status !== "running") {
+        clearCountdownInterval();
+        return;
+      }
+
+      if (state.timeLeft <= 0) {
+        endGame(); // WICHTIG: Spiel beenden!
+        set({ timeLeft: 0 });
+      } else {
+        set({ timeLeft: state.timeLeft - 1 });
+      }
     }, 1000);
   }
   return {
@@ -132,21 +145,24 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (state.status !== "running" || state.activeIndex === null) return;
 
       if (index === state.activeIndex) {
-        //Treffer
+        // TREFFER
+        clearRoundTimeout();
         set((prev) => ({
           ...prev,
           score: prev.score + 1,
         }));
         scheduleNextRound();
       } else {
-        // Miss
-        set((prev) => {
-          const nextMisses = prev.misses + 1;
-          if (nextMisses >= prev.config.maxMisses) {
-            endGame();
-          }
-          return { ...prev, misses: nextMisses };
-        });
+        // DANEBEN (Das hier hat gefehlt!)
+        const nextMisses = state.misses + 1;
+
+        if (nextMisses >= state.config.maxMisses) {
+          endGame();
+          set({ misses: nextMisses });
+        } else {
+          set({ misses: nextMisses });
+          // Spiel läuft weiter, aber Fehlerzähler geht hoch
+        }
       }
     },
 
